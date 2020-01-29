@@ -5,17 +5,13 @@ var Pessoa = require('../model/pessoa');
 router.get('/', (req, res) => {
     Pessoa.find({}).then(notes => {
         res.json(notes)
-    }).catch(error => {
-        response.sendStatus(404)
-    })
+    }).catch(error => response.sendStatus(404))
 })
 
 router.get('/:id', (request, response) => {
     Pessoa.findById(request.params.id).then(note => {
         response.json(note.toJSON())
-    }).catch(error => {
-        response.sendStatus(404)
-    })
+    }).catch(error => response.sendStatus(404))
 })
 
 router.post('/', (request, response) => {
@@ -24,28 +20,21 @@ router.post('/', (request, response) => {
 
     pessoa.save().then(savedPessoa => {
         response.json(savedPessoa.toJSON())
-    })
+    }).catch(error => response.status(400).json({ error: error.message }))
 })
 
 router.put('/:id', (request, response) => {
     const body = request.body
 
-    Pessoa.findByIdAndUpdate(request.params.id, body, { new: true })
-        .then(updatedNote => {
-            response.json(updatedNote.toJSON())
-        })
-        .catch(error => {
-            response.sendStatus(404)
-        })
+    Pessoa.findByIdAndUpdate(request.params.id, body, { new: true }).then(updatedNote => {
+        response.json(updatedNote.toJSON())
+    }).catch(error => response.status(400).json({ error: error.message }))
 })
 
 router.delete('/:id', (request, response) => {
-    Pessoa.findByIdAndRemove(request.params.id)
-        .then(result => {
-            response.sendStatus(204)
-        }).catch(error => {
-            response.sendStatus(404)
-        })
+    Pessoa.findByIdAndRemove(request.params.id).then(result => {
+        response.sendStatus(204)
+    }).catch(error => response.sendStatus(404))
 })
 
 module.exports = router;
