@@ -2,10 +2,13 @@ var express = require('express');
 var router = express.Router();
 var Pessoa = require('../model/pessoa');
 
-router.get('/', (req, res) => {
-    Pessoa.find({}).then(notes => {
-        res.json(notes)
-    }).catch(error => response.sendStatus(404))
+router.get('/', async (request, response) => {
+    const pessoas = await Pessoa.find({})
+    try{
+        response.json(pessoas)
+    } catch(error) {
+        response.sendStatus(404)
+    }
 })
 
 router.get('/:id', (request, response) => {
@@ -33,7 +36,11 @@ router.put('/:id', (request, response) => {
 
 router.delete('/:id', (request, response) => {
     Pessoa.findByIdAndRemove(request.params.id).then(result => {
+        if(!result){
+            response.sendStatus(404)
+        }else{
         response.sendStatus(204)
+        }
     }).catch(error => response.sendStatus(404))
 })
 
