@@ -2,6 +2,15 @@ var express = require('express');
 var router = express.Router();
 var Documento = require('../model/documento');
 var Pessoa = require('../model/pessoa');
+const jwt = require('jsonwebtoken')
+
+const getTokenFrom = request => {
+    const authorization = request.get('authorization')
+    if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+        return authorization.substring(7)
+    }
+    return null
+}
 
 router.get("/", (request, response) => {
     Documento.find({}).populate('pessoa', { name: 1, age: 1 })
@@ -11,6 +20,12 @@ router.get("/", (request, response) => {
 })
 
 router.post("/", async (request, response) => {
+    try {
+        const token = getTokenFrom(request)
+        const decodedToken = jwt.verify(token, process.env.SECRET)
+    } catch (error) {
+        return response.status(401).json({ error: 'token missing or invalid' })
+    }
     if (request.body.pessoa) {
         const pessoa = await Pessoa.findById(request.body.pessoa)
         const documento = new Documento({ ...request.body, pessoa: pessoa._id })
