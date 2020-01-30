@@ -15,7 +15,11 @@ mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFind
 
 const documentoSchema = new mongoose.Schema({
     content: {type: String, minlength: 3, required: true} ,
-    important: {type: Boolean, default: false}
+    important: {type: Boolean, default: false},
+    pessoa: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Pessoa'
+    }
 })
 
 documentoSchema.set('toJSON', {
@@ -26,4 +30,4 @@ documentoSchema.set('toJSON', {
     }
 })
 
-module.exports = mongoose.model('Document', documentoSchema)
+module.exports = mongoose.model('Documento', documentoSchema)

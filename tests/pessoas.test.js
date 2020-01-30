@@ -4,20 +4,24 @@ const app = require('../app')
 const api = supertest(app)
 
 const Pessoa = require('../model/pessoa')
+const bcrypt = require('bcrypt')
 const baseUrl = '/pessoas/'
 
 const initialPessoas = [
     {
         name: "Joao",
-        age: 15
+        age: 15,
+        passwordHash: "$2b$10$WANQtP988lm.CRobkOx4iu2VBUo4IU0ocngcATpmt5d9gorsUHhnG"
     },
     {
         name: "Maria",
-        age: 18
+        age: 18,
+        passwordHash: "$2b$10$WANQtP988lm.CRobkOx4iu2VBUo4IU0ocngcATpmt5d9gorsUHhnG"
     },
     {
         name: "Cleber",
-        age: 20
+        age: 20,
+        passwordHash: "$2b$10$WANQtP988lm.CRobkOx4iu2VBUo4IU0ocngcATpmt5d9gorsUHhnG"
     }
 ]
 
@@ -43,9 +47,16 @@ beforeEach(async () => {
 })
 
 describe('Pessoa service', () => {
-    const pessoaTeste = {
+    const pessoaTesteInsercao = {
         name: "Teste",
-        age: 15
+        age: 15,
+        password: "123456789"
+    }
+
+    const pessoaTestePass = {
+        name: "Teste",
+        age: 15,
+        passwordHash: "$2b$10$WANQtP988lm.CRobkOx4iu2VBUo4IU0ocngcATpmt5d9gorsUHhnG"
     }
 
     describe('Recuperando informações', () => {
@@ -66,7 +77,7 @@ describe('Pessoa service', () => {
         })
 
         test('busca uma pessoa especifica inválida', async () => {
-            const id = await nonExistingId(Pessoa, pessoaTeste)
+            const id = await nonExistingId(Pessoa, pessoaTestePass)
 
             const resBuscaPrimeiraPessoa = await api.get(baseUrl + "/" + id)
             expect(resBuscaPrimeiraPessoa.status).toBe(404)
@@ -75,21 +86,21 @@ describe('Pessoa service', () => {
 
     describe('Adicionando informações', () => {
         test('adição valida nova pessoa', async () => {
-            const res = await api.post(baseUrl).send(pessoaTeste)
+            const res = await api.post(baseUrl).send(pessoaTesteInsercao)
             expect(res.status).toBe(200)
-            expect(res.body.name).toBe(pessoaTeste.name)
+            expect(res.body.name).toBe(pessoaTesteInsercao.name)
 
             const resList = await api.get(baseUrl)
             expect(resList.status).toBe(200)
             expect(resList.body.length).toBe(initialPessoas.length + 1)
-            expect(resList.body.map(pessoa => pessoa.name)).toContain(pessoaTeste.name)
+            expect(resList.body.map(pessoa => pessoa.name)).toContain(pessoaTesteInsercao.name)
         })
 
         test('adição invalida nova pessoa', async () => {
-            const resOnlyName = await api.post(baseUrl).send({ name: "Teste" })
+            const resOnlyName = await api.post(baseUrl).send({ name: "Teste", passwordHash: "$2b$10$WANQtP988lm.CRobkOx4iu2VBUo4IU0ocngcATpmt5d9gorsUHhnG"})
             expect(resOnlyName.status).toBe(400)
 
-            const resOnlyAge = await api.post(baseUrl).send({ age: 15 })
+            const resOnlyAge = await api.post(baseUrl).send({ age: 15, passwordHash: "$2b$10$WANQtP988lm.CRobkOx4iu2VBUo4IU0ocngcATpmt5d9gorsUHhnG"})
             expect(resOnlyAge.status).toBe(400)
 
             const resEmptyObject = await api.post(baseUrl).send({})
@@ -114,7 +125,7 @@ describe('Pessoa service', () => {
         })
 
         test('deleta uma pessoa inválida', async () => {
-            const id = await nonExistingId(Pessoa, pessoaTeste)
+            const id = await nonExistingId(Pessoa, pessoaTestePass)
 
             const resDeletaPessoa = await api.delete(baseUrl + "/" + id)
             expect(resDeletaPessoa.status).toBe(404)
