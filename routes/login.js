@@ -26,7 +26,7 @@ router.post('/', async (request, response) => {
 
     response
         .status(200)
-        .send({ token, name: pessoa.name })
+        .send({ token, id:pessoa.id, name: pessoa.name })
 })
 
 module.exports = router
